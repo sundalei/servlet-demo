@@ -1,6 +1,7 @@
 package com.wileyedge;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.wileyedge.dao.UserDao;
 import com.wileyedge.model.User;
+import com.wileyedge.util.DbUtil;
 
 @WebServlet("/user")
 public class UserServlet extends HttpServlet {
@@ -86,5 +88,20 @@ public class UserServlet extends HttpServlet {
 		RequestDispatcher view = req.getRequestDispatcher(LIST_USER);
 		req.setAttribute("users", dao.getAllUsers());
 		view.forward(req, resp);
+	}
+	
+	@Override
+	public void destroy() {  
+		System.out.println("context destroy");  
+		try {
+			if (DbUtil.getConnection() != null) {
+				DbUtil.getConnection().close();
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			System.err.println("e: " + e.getMessage());
+			e.printStackTrace();
+			
+		}
 	}
 }
