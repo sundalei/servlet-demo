@@ -11,8 +11,28 @@ public class UserDao {
 	
 	private Connection connection;
 	
-	public UserDao() {
-		this.connection = DbUtil.getConnection();
+	private String driver;
+	private String url;
+	private String user;
+	private String password;
+	
+
+	public UserDao(String driver, String url, String user, String password) {
+		this.driver = driver;
+		this.url = url;
+		this.user = user;
+		this.password = password;
+		
+		try {
+			Class.forName(driver);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		try {
+			this.connection = DriverManager.getConnection(url, user, password);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void addUser(User user) {
@@ -105,5 +125,9 @@ public class UserDao {
 		}
 
 		return user;
+	}
+
+	public Connection getConnection() {
+		return connection;
 	}
 }

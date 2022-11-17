@@ -1,10 +1,12 @@
 package com.wileyedge;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Properties;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -15,7 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.wileyedge.dao.UserDao;
 import com.wileyedge.model.User;
-import com.wileyedge.util.DbUtil;
 
 @WebServlet("/user")
 public class UserServlet extends HttpServlet {
@@ -27,9 +28,26 @@ public class UserServlet extends HttpServlet {
 	
 	private UserDao dao;
 	
-	public UserServlet() {
-		this.dao = new UserDao();
+	@Override
+	public void init() throws ServletException {
+		
+		System.out.println("UserServlet init invoked.");
+		Properties properties = new Properties();
+		InputStream inputStream = this.getServletContext().getResourceAsStream("db.properties");
+		try {
+			properties.load(inputStream);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		String driver = properties.getProperty("driver");
+		String url = properties.getProperty("url");
+		String user = properties.getProperty("user");
+		String password = properties.getProperty("password");
+		
+		this.dao = new UserDao(driver, url, user, password);
 	}
+	
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -92,10 +110,10 @@ public class UserServlet extends HttpServlet {
 	
 	@Override
 	public void destroy() {  
-		System.out.println("context destroy");  
+		System.out.println("UserServlet destroy invoked.");  
 		try {
-			if (DbUtil.getConnection() != null) {
-				DbUtil.getConnection().close();
+			if (dao.getConnection() != null) {
+				dao.getConnection().close();
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
