@@ -2,6 +2,7 @@ package com.wileyedge;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,6 +33,7 @@ public class UserServlet extends HttpServlet {
 	public void init() throws ServletException {
 		
 		System.out.println("UserServlet init invoked.");
+		
 		Properties properties = new Properties();
 		InputStream inputStream = this.getServletContext().getResourceAsStream("db.properties");
 		try {
@@ -110,16 +112,19 @@ public class UserServlet extends HttpServlet {
 	
 	@Override
 	public void destroy() {  
-		System.out.println("UserServlet destroy invoked.");  
+		System.out.println("UserServlet destroy invoked.");
+		
+		// ISSUE. The web application [user-manager-demo] registered the JDBC driver [com.mysql.cj.jdbc.Driver] 
+		// but failed to unregister it when the web application was stopped. To prevent a memory leak, the JDBC Driver has been forcibly unregistered.
+		// https://stackoverflow.com/questions/3320400/to-prevent-a-memory-leak-the-jdbc-driver-has-been-forcibly-unregistered
+		
+		Connection connection = dao.getConnection();
 		try {
-			if (dao.getConnection() != null) {
-				dao.getConnection().close();
+			if (connection != null) {
+				connection.close();
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			System.err.println("e: " + e.getMessage());
 			e.printStackTrace();
-			
 		}
 	}
 }
